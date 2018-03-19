@@ -37,7 +37,7 @@ public class Controller {
         }
     }
 
-    public List<Person> getPersonList(){
+    public List<Person> getPersonList() {
         try {
             client.getOutputProtocol().getTransport().open();
             List<Person> personList = client.getPersonList();
@@ -48,7 +48,7 @@ public class Controller {
         }
     }
 
-    public List<Organisation> getOrganisationList(){
+    public List<Organisation> getOrganisationList() {
         try {
             client.getOutputProtocol().getTransport().open();
             List<Organisation> organisationList = client.getOrganisationList();
@@ -59,11 +59,22 @@ public class Controller {
         }
     }
 
-    public void addBook(Book book){
+    public void addBook(Book book) {
         try {
             client.getOutputProtocol().getTransport().open();
             client.addBook(book);
             client.getOutputProtocol().getTransport().close();
+        } catch (TException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Book> findBook(String name) {
+        try {
+            client.getOutputProtocol().getTransport().open();
+            List<Book> bookList = client.findBook(name);
+            client.getOutputProtocol().getTransport().close();
+            return bookList;
         } catch (TException e) {
             throw new RuntimeException(e);
         }

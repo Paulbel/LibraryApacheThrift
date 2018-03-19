@@ -37,4 +37,9 @@ public class BookHandler implements LibraryService.Iface {
     public void addBook(Book book) throws TException {
         bookDAO.addBook(book);
     }
+
+    @Override
+    public List<Book> findBook(String name) throws TException {
+        return bookDAO.findBook(name);
+    }
 }

@@ -23,6 +23,7 @@ public class MainFrame {
     private JPanel editPanel;
     private JPanel addPanel;
     private JPanel listPanel;
+    private JPanel searchPanel;
     private JTabbedPane tabbedPane;
 
 
@@ -32,7 +33,7 @@ public class MainFrame {
         frame = new JFrame();
 
         tabbedPane = new JTabbedPane();
-
+        searchPanel = new JPanel();
         editPanel = new JPanel();
         infoPanel = new JPanel();
         addPanel = new JPanel();
@@ -41,22 +42,20 @@ public class MainFrame {
         bookList = controller.getBookList();
         JPanel mainPanel = new JPanel(new BorderLayout());
         listPanel = new JPanel();
-        listPanel.setBackground(Color.BLUE);
         JPanel contentPanel = new JPanel();
 
         contentPanel.setLayout(new BorderLayout());
         contentPanel.add(tabbedPane, BorderLayout.NORTH);
 
-        tabbedPane.addTab("tab1", infoPanel);
-        tabbedPane.addTab("tab2", editPanel);
-        tabbedPane.addTab("tab3", addPanel);
-
+        tabbedPane.addTab("Просмотр", infoPanel);
+        tabbedPane.addTab("Редактирование", editPanel);
+        tabbedPane.addTab("Добавление", addPanel);
+        tabbedPane.addTab("Поиск", searchPanel);
 
         //contentPanel.add(infoPanel, BorderLayout.CENTER);
 
-        infoPanel.setLayout(new GridLayout(10, 1));
+
         infoPanel.setPreferredSize(new Dimension(400, 400));
-        infoPanel.setBackground(Color.RED);
         bookJList = new JList<>();
         bookJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         AbstractListModel abstractListModel = new BookListModel(bookList);
@@ -67,7 +66,6 @@ public class MainFrame {
 
         mainPanel.add(listPanel, BorderLayout.WEST);
         mainPanel.add(contentPanel, BorderLayout.CENTER);
-        //mainPanel.add(tabbedPane, BorderLayout.NORTH);
 
         frame.add(mainPanel);
         frame.setSize(600, 400);
@@ -122,6 +120,7 @@ public class MainFrame {
         personList = controller.getPersonList();
         int currentIndex = bookJList.getSelectedIndex();
         setBookAddPanel();
+        setBookSearchPanel();
         if (currentIndex > -1) {
             setBookViewInfoPanel(currentIndex);
             setBookEditPanel(currentIndex);
@@ -132,9 +131,12 @@ public class MainFrame {
 
     private void setBookAddPanel() {
         addPanel.removeAll();
+        addPanel.setLayout(new GridLayout(5,2));
         addPanel.add(new JLabel("Название: "));
         JTextField nameTextField = new JTextField(20);
         addPanel.add(nameTextField);
+        addPanel.add(new JLabel("Кол-во страниц: "));
+
         JTextField pageNumberTextField = new JTextField(20);
         addPanel.add(pageNumberTextField);
 
@@ -143,6 +145,8 @@ public class MainFrame {
             organisationNames[index] = organisationList.get(index).getName();
         }
         JComboBox organisationComboBox = new JComboBox(organisationNames);
+        addPanel.add(new JLabel("Издательство: "));
+
         addPanel.add(organisationComboBox);
 
         String[] names = new String[personList.size()];
@@ -165,28 +169,61 @@ public class MainFrame {
                 revalidateList();
             }
         });
+        addPanel.add(new JLabel("Автор: "));
+
         addPanel.add(authorComboBox);
         addPanel.add(addButton);
-       // addPanel.revalidate();
-        //addPanel.repaint();
+    }
+
+    private void setBookSearchPanel() {
+        searchPanel.removeAll();
+        searchPanel.setLayout(new BorderLayout());
+        JTextField nameTextField = new JTextField(20);
+        JPanel fieldPanel = new JPanel();
+        fieldPanel.add(nameTextField);
+        JPanel resultPanel = new JPanel();
+        JButton findButton = new JButton("Найти");
+        fieldPanel.add(findButton);
+
+        findButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                List<Book> bookList = controller.findBook(nameTextField.getText());
+                JList list = new JList(new BookListModel(bookList));
+                resultPanel.removeAll();
+                resultPanel.add(list);
+                frame.revalidate();
+                frame.repaint();
+            }
+        });
+        searchPanel.add(fieldPanel, BorderLayout.NORTH);
+        searchPanel.add(resultPanel, BorderLayout.CENTER);
+
     }
 
     private void setBookViewInfoPanel(int bookIndex) {
         infoPanel.removeAll();
-
+        infoPanel.setPreferredSize(new Dimension(200,200));
+        infoPanel.setLayout(new GridLayout(4, 2));
         Book currentBook = bookList.get(bookIndex);
-        infoPanel.add(new JLabel("Название: " + currentBook.getName()));
-        infoPanel.add(new JLabel("Автор: " + getNameSurname(currentBook.getAuthor())));
+        infoPanel.add(new JLabel("Название: "));
+        infoPanel.add(new JLabel(currentBook.getName()));
 
-        infoPanel.add(new JLabel("Издательство: " + currentBook.getPublisher().getName() + ", тел.: " + currentBook.getPublisher().getPhone() + ", email: " + currentBook.getPublisher().getEmail()));
-        infoPanel.add(new JLabel("Количество страниц: " + currentBook.getPageNumber()));
-        //infoPanel.revalidate();
-        //infoPanel.repaint();
+        infoPanel.add(new JLabel("Автор: "));
+        infoPanel.add(new JLabel(getNameSurname(currentBook.getAuthor())));
+
+        infoPanel.add(new JLabel("Издательство: "));
+        infoPanel.add(new JLabel(currentBook.getPublisher().getName() +
+                ", тел.: " + currentBook.getPublisher().getPhone() +
+                ", email: " + currentBook.getPublisher().getEmail()));
+        infoPanel.add(new JLabel("Количество страниц: "));
+        infoPanel.add(new JLabel(String.valueOf(currentBook.getPageNumber())));
+
     }
 
     private void setBookEditPanel(int bookIndex) {
         editPanel.removeAll();
-        editPanel.setBackground(Color.GREEN);
+        editPanel.setLayout(new GridLayout(5,2));
         Book currentBook = bookList.get(bookIndex);
 
         editPanel.add(new JLabel("Название: "));
@@ -198,9 +235,7 @@ public class MainFrame {
         editPanel.add(pageNumberField);
 
         editPanel.add(new JLabel("Автор: "));
-        JButton editNameButton = new JButton("Изменить");
 
-        editPanel.add(editNameButton);
 
         String[] organisationNames = new String[organisationList.size()];
         for (int index = 0; index < organisationList.size(); index++) {
@@ -208,7 +243,6 @@ public class MainFrame {
         }
         JComboBox organisationComboBox = new JComboBox(organisationNames);
         organisationComboBox.setSelectedIndex(organisationList.indexOf(currentBook.getPublisher()));
-
         String[] names = new String[personList.size()];
         for (int index = 0; index < names.length; index++) {
             names[index] = getNameSurname(personList.get(index));
@@ -218,9 +252,13 @@ public class MainFrame {
         authorComboBox.setSelectedIndex(personList.indexOf(currentBook.getAuthor()));
 
         editPanel.add(authorComboBox);
-        editPanel.add(organisationComboBox);
+        editPanel.add(new JLabel("Организация: "));
 
-        editNameButton.addActionListener(e -> {
+        editPanel.add(organisationComboBox);
+        JButton editButton = new JButton("Изменить");
+
+        editPanel.add(editButton);
+        editButton.addActionListener(e -> {
             int currentBookIndex = bookJList.getSelectedIndex();
             Book currentBook1 = bookList.get(currentBookIndex);
 
@@ -245,7 +283,6 @@ public class MainFrame {
         bookJList.setModel(abstractListModel);
         listPanel.add(bookJList);
         bookJList.setSelectedIndex(currentIndex);
-        //bookJList.revalidate();
         frame.revalidate();
         frame.repaint();
     }

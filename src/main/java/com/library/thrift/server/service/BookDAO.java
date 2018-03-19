@@ -11,6 +11,8 @@ public interface BookDAO {
     void changeBookInfo(Book book);
 
     void addBook(Book book);
+
+    List<Book> findBook(String name);
 }
 
 

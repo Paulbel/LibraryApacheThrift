@@ -11,9 +11,10 @@ import java.util.List;
 
 public class BookDAOImpl implements BookDAO {
     private final static String ADD_BOOK_QUERY = "INSERT INTO book (name, author, publisher, page_number) VALUES (?,?,?,?);";
-    private final static String GET_BOOK_LIST =
+    private final static String GET_BOOK_LIST_QUERY =
             "SELECT * FROM author " +
                     "INNER JOIN book ON author.id= book.author INNER JOIN organisation ON book.publisher = organisation.id;";
+    private final static String FIND_BOOK_QUERY = "SELECT * FROM book INNER JOIN author ON book.author = author.id INNER JOIN organisation ON book.publisher = organisation.id WHERE book.name LIKE ?";
 
     private final static String CHANGE_BOOK_INFO = "UPDATE book SET name = ?, page_number =?, publisher = ?, author = ? WHERE id = ?;";
 
@@ -22,7 +23,7 @@ public class BookDAOImpl implements BookDAO {
         try (Connection connection = ConnectionProvider.getInstance().getConnection();
              Statement statement = connection.createStatement()) {
             List<Book> bookList = new ArrayList<>();
-            ResultSet resultSet = statement.executeQuery(GET_BOOK_LIST);
+            ResultSet resultSet = statement.executeQuery(GET_BOOK_LIST_QUERY);
             while (resultSet.next()) {
                 bookList.add(createBookFromResultSet(resultSet));
             }
@@ -58,6 +59,22 @@ public class BookDAOImpl implements BookDAO {
             statement.setInt(4, book.getAuthor().getId());
 
             statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Book> findBook(String name) {
+        try (Connection connection = ConnectionProvider.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(FIND_BOOK_QUERY)) {
+            statement.setString(1, name + "%");
+            ResultSet resultSet = statement.executeQuery();
+            List<Book> bookList = new ArrayList<>();
+            while (resultSet.next()) {
+                bookList.add(createBookFromResultSet(resultSet));
+            }
+            return bookList;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
