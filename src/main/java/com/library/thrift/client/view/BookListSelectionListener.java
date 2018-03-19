@@ -15,7 +15,6 @@ public class BookListSelectionListener implements ListSelectionListener {
     @Override
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
-            mainFrame.setCurrentBookViewIndex(mainFrame.getBookJList().getSelectedIndex());
             mainFrame.revalidateView();
         }
 

@@ -1,6 +1,6 @@
 package com.library.thrift.client.controller;
 
-import com.library.thrift.BookService;
+import com.library.thrift.LibraryService;
 import com.library.thrift.client.view.MainFrame;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -20,7 +20,7 @@ public class JavaClient {
             transport = new TSocket("localhost", 9090);
 
             TProtocol protocol = new TBinaryProtocol(transport);
-            BookService.Client client = new BookService.Client(protocol);
+            LibraryService.Client client = new LibraryService.Client(protocol);
 
             Controller controller = new Controller(client);
 

@@ -1,6 +1,6 @@
 package com.library.thrift.server;
 
-import com.library.thrift.BookService;
+import com.library.thrift.LibraryService;
 import com.library.thrift.server.service.BookHandler;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TServer.Args;
@@ -13,12 +13,12 @@ public class JavaServer {
 
     public static BookHandler handler;
 
-    public static BookService.Processor processor;
+    public static LibraryService.Processor processor;
 
     public static void main(String[] args) {
         try {
             handler = new BookHandler();
-            processor = new BookService.Processor<>(handler);
+            processor = new LibraryService.Processor<>(handler);
 
             Runnable simple = () -> simple(processor);
 
@@ -28,7 +28,7 @@ public class JavaServer {
         }
     }
 
-    public static void simple(BookService.Processor processor) {
+    public static void simple(LibraryService.Processor processor) {
         try {
             TServerTransport serverTransport = new TServerSocket(9090);
             TServer server = new TSimpleServer(new Args(serverTransport).processor(processor));

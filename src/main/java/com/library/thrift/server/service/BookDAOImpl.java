@@ -10,11 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BookDAOImpl implements BookDAO {
+    private final static String ADD_BOOK_QUERY = "INSERT INTO book (name, author, publisher, page_number) VALUES (?,?,?,?);";
     private final static String GET_BOOK_LIST =
             "SELECT * FROM author " +
-                    "INNER JOIN book ON author.id= book.author INNER JOIN organisation ON book.publisher = organisation.id";
+                    "INNER JOIN book ON author.id= book.author INNER JOIN organisation ON book.publisher = organisation.id;";
 
-    private final static String CHANGE_BOOK_INFO = "UPDATE book SET name = ?, page_number =? WHERE id = ?";
+    private final static String CHANGE_BOOK_INFO = "UPDATE book SET name = ?, page_number =?, publisher = ?, author = ? WHERE id = ?;";
 
     @Override
     public List<Book> getBookList() {
@@ -37,7 +38,24 @@ public class BookDAOImpl implements BookDAO {
              PreparedStatement statement = connection.prepareStatement(CHANGE_BOOK_INFO)) {
             statement.setString(1, book.getName());
             statement.setInt(2, book.getPageNumber());
-            statement.setInt(3, book.getId());
+            statement.setInt(3, book.getPublisher().getId());
+            statement.setInt(4, book.getAuthor().getId());
+            statement.setInt(5, book.getId());
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void addBook(Book book) {
+        try (Connection connection = ConnectionProvider.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(ADD_BOOK_QUERY)) {
+            statement.setString(1, book.getName());
+            statement.setInt(2, book.getPageNumber());
+            statement.setInt(3, book.getPublisher().getId());
+            statement.setInt(4, book.getAuthor().getId());
 
             statement.executeUpdate();
         } catch (SQLException e) {
